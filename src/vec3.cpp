@@ -5,7 +5,7 @@
 #include <mruby/data.h>
 
 #include <glm/glm.hpp>
-#include <glm\core\func_geometric.hpp>
+#include <glm/core/func_geometric.hpp>
 
 namespace mruby_glm
 {
