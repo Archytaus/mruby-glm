@@ -63,6 +63,20 @@ namespace mruby_glm
 		return new_value;
 	}
 
+	mrb_value vec2_equals(mrb_state* mrb, mrb_value self)
+	{
+		mrb_value new_value;
+		int args = mrb_get_args(mrb, "o", &new_value);
+		vec2* arg =(struct vec2*)mrb_data_get_ptr(mrb, new_value, &vec2_type);
+		vec2* selfValue = (struct vec2*)mrb_data_get_ptr(mrb, self, &vec2_type);
+
+		if (!arg) return mrb_nil_value();
+
+		return mrb_bool_value(
+			selfValue->vector->x == arg->vector->x &&
+			selfValue->vector->y == arg->vector->y);
+	}
+
 	mrb_value vec2_plus(mrb_state* mrb, mrb_value self)
 	{
 		mrb_value new_value;
@@ -77,7 +91,7 @@ namespace mruby_glm
 			selfValue->vector->y + arg->vector->y)));
 	}
 
-	mrb_value vec2_equals(mrb_state* mrb, mrb_value self)
+	mrb_value vec2_plus_inplace(mrb_state* mrb, mrb_value self)
 	{
 		mrb_value new_value;
 		int args = mrb_get_args(mrb, "o", &new_value);
@@ -86,9 +100,9 @@ namespace mruby_glm
 
 		if (!arg) return mrb_nil_value();
 
-		return mrb_bool_value(
-			selfValue->vector->x == arg->vector->x &&
-			selfValue->vector->y == arg->vector->y);
+		selfValue->vector->x += arg->vector->x;
+		selfValue->vector->y += arg->vector->y;
+		return self;
 	}
 
 	mrb_value vec2_subtract(mrb_state* mrb, mrb_value self)
@@ -106,6 +120,20 @@ namespace mruby_glm
 			selfValue->vector->y - arg->vector->y)));
 	}
 
+	mrb_value vec2_subtract_inplace(mrb_state* mrb, mrb_value self)
+	{
+		mrb_value new_value;
+		int args = mrb_get_args(mrb, "o", &new_value);
+		vec2* arg =(struct vec2*)mrb_data_get_ptr(mrb, new_value, &vec2_type);
+		vec2* selfValue = (struct vec2*)mrb_data_get_ptr(mrb, self, &vec2_type);
+
+		if (!arg) return mrb_nil_value();
+
+		selfValue->vector->x -= arg->vector->x;
+		selfValue->vector->y -= arg->vector->y;
+		return self;
+	}
+
 	mrb_value vec2_usubtract(mrb_state* mrb, mrb_value self)
 	{
 		vec2* selfValue = (struct vec2*)mrb_data_get_ptr(mrb, self, &vec2_type);
@@ -116,6 +144,17 @@ namespace mruby_glm
 			glm::vec2(
 			0 - selfValue->vector->x,
 			0 - selfValue->vector->y)));
+	}
+
+	mrb_value vec2_usubtract_inplace(mrb_state* mrb, mrb_value self)
+	{
+		vec2* selfValue = (struct vec2*)mrb_data_get_ptr(mrb, self, &vec2_type);
+
+		if (!selfValue) return mrb_nil_value();
+
+		selfValue->vector->x = 0 - selfValue->vector->x;
+		selfValue->vector->y = 0 - selfValue->vector->y;
+		return self;
 	}
 
 	mrb_value vec2_times(mrb_state* mrb, mrb_value self)
@@ -145,6 +184,33 @@ namespace mruby_glm
 		return mrb_nil_value();
 	}
 
+	mrb_value vec2_times_inplace(mrb_state* mrb, mrb_value self)
+	{
+		vec2* selfValue = (struct vec2*)mrb_data_get_ptr(mrb, self, &vec2_type);
+
+		mrb_value new_value;
+		mrb_get_args(mrb, "o", &new_value);
+		vec2* arg =(struct vec2*)mrb_data_get_ptr(mrb, new_value, &vec2_type);
+
+		if (arg)
+		{
+			selfValue->vector->x *= arg->vector->x;
+			selfValue->vector->y *= arg->vector->y;
+			return self;
+		}
+
+		mrb_float modifier;
+		mrb_get_args(mrb, "f", &modifier);
+		if(modifier)
+		{
+			selfValue->vector->x *= modifier;
+			selfValue->vector->y *= modifier;
+			return self;
+		}
+
+		return mrb_nil_value();
+	}
+
 	mrb_value vec2_divide(mrb_state* mrb, mrb_value self)
 	{
 		vec2* selfValue = (struct vec2*)mrb_data_get_ptr(mrb, self, &vec2_type);
@@ -167,6 +233,33 @@ namespace mruby_glm
 			return vec2_wrap(mrb, mrb_class_get(mrb, "Vec2"), new vec2(
 				glm::vec2(selfValue->vector->x / modifier,
 				selfValue->vector->y / modifier)));
+		}
+
+		return mrb_nil_value();
+	}
+
+	mrb_value vec2_divide_inplace(mrb_state* mrb, mrb_value self)
+	{
+		vec2* selfValue = (struct vec2*)mrb_data_get_ptr(mrb, self, &vec2_type);
+
+		mrb_value new_value;
+		mrb_get_args(mrb, "o", &new_value);
+		vec2* arg =(struct vec2*)mrb_data_get_ptr(mrb, new_value, &vec2_type);
+
+		if (arg)
+		{
+			selfValue->vector->x /= arg->vector->x;
+			selfValue->vector->y /= arg->vector->y;
+			return self;
+		}
+
+		mrb_float modifier;
+		mrb_get_args(mrb, "f", &modifier);
+		if(modifier)
+		{
+			selfValue->vector->x /= modifier;
+			selfValue->vector->y /= modifier;
+			return self;
 		}
 
 		return mrb_nil_value();
@@ -212,6 +305,14 @@ namespace mruby_glm
 		vec2* result = new vec2(glm::normalize(*selfValue->vector));
 
 		return vec2_wrap(mrb, mrb_class_get(mrb, "Vec2"), result);
+	}
+
+	mrb_value vec2_normalize_inplace(mrb_state* mrb, mrb_value self)
+	{
+		vec2* selfValue = (struct vec2*)mrb_data_get_ptr(mrb, self, &vec2_type);
+		*selfValue->vector = glm::normalize(*selfValue->vector);
+
+		return self;
 	}
 
 	mrb_value vec2_length(mrb_state* mrb, mrb_value self)
@@ -270,12 +371,28 @@ namespace mruby_glm
 		mrb_define_method(mrb, vector2Class, "y=", vec2_set_y, ARGS_REQ(1));
 
 		mrb_define_method(mrb, vector2Class, "+", vec2_plus, ARGS_REQ(1));
+		mrb_define_method(mrb, vector2Class, "add", vec2_plus, ARGS_REQ(1));
+		mrb_define_method(mrb, vector2Class, "add!", vec2_plus_inplace, ARGS_REQ(1));
+
 		mrb_define_method(mrb, vector2Class, "-", vec2_subtract, ARGS_REQ(1));
+		mrb_define_method(mrb, vector2Class, "subtract", vec2_subtract, ARGS_REQ(1));
+		mrb_define_method(mrb, vector2Class, "subtract!", vec2_subtract_inplace, ARGS_REQ(1));
+
 		mrb_define_method(mrb, vector2Class, "-@", vec2_usubtract, ARGS_NONE());
+		mrb_define_method(mrb, vector2Class, "negate", vec2_usubtract, ARGS_NONE());
+		mrb_define_method(mrb, vector2Class, "negate!", vec2_usubtract_inplace, ARGS_NONE());
+
 		mrb_define_method(mrb, vector2Class, "*", vec2_times, ARGS_REQ(1));
+		mrb_define_method(mrb, vector2Class, "multiply", vec2_times, ARGS_REQ(1));
+		mrb_define_method(mrb, vector2Class, "multiply!", vec2_times_inplace, ARGS_REQ(1));
+
 		mrb_define_method(mrb, vector2Class, "/", vec2_divide, ARGS_REQ(1));
+		mrb_define_method(mrb, vector2Class, "divide", vec2_divide, ARGS_REQ(1));
+		mrb_define_method(mrb, vector2Class, "divide!", vec2_divide_inplace, ARGS_REQ(1));
 
 		mrb_define_method(mrb, vector2Class, "normalize", vec2_normalize, ARGS_NONE());
+		mrb_define_method(mrb, vector2Class, "normalize!", vec2_normalize_inplace, ARGS_NONE());
+
 		mrb_define_method(mrb, vector2Class, "length", vec2_length, ARGS_NONE());
 
 		mrb_define_method(mrb, vector2Class, "dot", vec2_dot, ARGS_REQ(1));

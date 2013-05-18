@@ -414,23 +414,22 @@ namespace mruby_glm
 
 		mrb_define_method(mrb, vector3Class, "+", vec3_plus, ARGS_REQ(1));
 		mrb_define_method(mrb, vector3Class, "add", vec3_plus, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "add!", vec3_plus_inplace, ARGS_REQ(1));
+
 		mrb_define_method(mrb, vector3Class, "-", vec3_subtract, ARGS_REQ(1));
 		mrb_define_method(mrb, vector3Class, "subtract", vec3_subtract, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "subtract!", vec3_subtract_inplace, ARGS_REQ(1));
+
 		mrb_define_method(mrb, vector3Class, "-@", vec3_usubtract, ARGS_NONE());
 		mrb_define_method(mrb, vector3Class, "negate", vec3_usubtract, ARGS_NONE());
+		mrb_define_method(mrb, vector3Class, "negate!", vec3_usubtract_inplace, ARGS_NONE());
+
 		mrb_define_method(mrb, vector3Class, "*", vec3_times, ARGS_REQ(1));
 		mrb_define_method(mrb, vector3Class, "multiply", vec3_times, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "multiply!", vec3_times_inplace, ARGS_REQ(1));
+
 		mrb_define_method(mrb, vector3Class, "/", vec3_divide, ARGS_REQ(1));
 		mrb_define_method(mrb, vector3Class, "divide", vec3_times, ARGS_REQ(1));
-
-		mrb_define_method(mrb, vector3Class, "+=", vec3_plus_inplace, ARGS_REQ(1));
-		mrb_define_method(mrb, vector3Class, "add!", vec3_plus_inplace, ARGS_REQ(1));
-		mrb_define_method(mrb, vector3Class, "-=", vec3_subtract_inplace, ARGS_REQ(1));
-		mrb_define_method(mrb, vector3Class, "subtract!", vec3_subtract_inplace, ARGS_REQ(1));
-		mrb_define_method(mrb, vector3Class, "negate!", vec3_usubtract_inplace, ARGS_NONE());
-		mrb_define_method(mrb, vector3Class, "*=", vec3_times_inplace, ARGS_REQ(1));
-		mrb_define_method(mrb, vector3Class, "multiply!", vec3_times_inplace, ARGS_REQ(1));
-		mrb_define_method(mrb, vector3Class, "/=", vec3_divide_inplace, ARGS_REQ(1));
 		mrb_define_method(mrb, vector3Class, "divide!", vec3_divide_inplace, ARGS_REQ(1));
 
 		mrb_define_method(mrb, vector3Class, "normalize", vec3_normalize, ARGS_NONE());

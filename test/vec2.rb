@@ -39,39 +39,86 @@ assert 'set y property' do
 	vec.y == 2
 end
 
-assert 'addition' do
+assert 'add' do
 	value = Vec2.new(0, 1) + Vec2.new(1, 0)
 	value.x == 1 && value.y == 1
 end
 
-assert 'multiplication' do
+assert 'add!' do
+	value = Vec2.new(0, 1)
+	value.add! Vec2.new(1, 0)
+	value.x == 1 && value.y == 1
+end
+
+assert 'multiply' do
 	value = Vec2.new(1) * Vec2.new(3)
 	value.x == 3 && value.y == 3
 end
 
-assert 'float multiplication' do
+assert 'multiply!' do
+	value = Vec2.new(1)
+	value.multiply! Vec2.new(3)
+	value.x == 3 && value.y == 3
+end
+
+assert 'float multiply' do
 	value = Vec2.new(1) * 3
 	value.x == 3 && value.y == 3
 end
 
-assert 'multiplication is not destructive' do
+assert 'float multiply!' do
+	value = Vec2.new(1)
+	value.multiply! 3
+	value.x == 3 && value.y == 3
+end
+
+assert 'multiply is not destructive' do
 	original = Vec2.new(1)
 	value = original * Vec2.new(3, 3)
 	original.x == 1 && original.y == 1
 end
 
-assert 'subtraction' do
+assert 'subtract' do
 	value = Vec2.new(3) - Vec2.new(2)
 	value.x == 1 && value.y == 1
 end
 
-assert 'division' do
+assert 'subtract!' do
+	value = Vec2.new(3)
+	value.subtract! Vec2.new(2)
+	value.x == 1 && value.y == 1
+end
+
+assert 'negate' do
+	value = -Vec2.new(3)
+	value.x == -3 && value.y == -3
+end
+
+assert 'negate!' do
+	value = Vec2.new(3)
+	value.negate!
+	value.x == -3 && value.y == -3
+end
+
+assert 'divide' do
 	value = Vec2.new(4) / Vec2.new(2)
 	value.x == 2 && value.y == 2
 end
 
-assert 'float division' do
+assert 'divide!' do
+	value = Vec2.new(4)
+	value.divide! Vec2.new(2)
+	value.x == 2 && value.y == 2
+end
+
+assert 'float divide' do
 	value = Vec2.new(4) / 2
+	value.x == 2 && value.y == 2
+end
+
+assert 'float divide!' do
+	value = Vec2.new(4)
+	value.divide! 2
 	value.x == 2 && value.y == 2
 end
 
@@ -88,6 +135,12 @@ assert 'normalize' do
 	value.x == 0 && value.y == 1
 end
 
+assert 'normalize!' do
+	value = Vec2.new(0, 5)
+	value.normalize!
+	value.x == 0 && value.y == 1
+end
+
 assert 'length' do
 	value = Vec2.new(0, 3).length
 	value == 3
@@ -101,4 +154,24 @@ end
 assert 'dot' do
 	value = Vec2.new(3).dot(Vec2.new(3, 4))
 	value == 21
+end
+
+
+assert 'memory allocation' do
+	after_obj_count = {}
+	before_obj_count = {}
+	other_value = Vec2.new(3)
+	ObjectSpace.count_objects(before_obj_count)
+
+	value = Vec2.new(3)
+
+	ObjectSpace.count_objects(after_obj_count)
+	assert_equal(before_obj_count[:MRB_TT_DATA] + 1, after_obj_count[:MRB_TT_DATA])
+
+	ObjectSpace.count_objects(before_obj_count)
+
+	value.multiply! other_value
+
+	ObjectSpace.count_objects(after_obj_count)
+	assert_equal(before_obj_count[:MRB_TT_DATA], after_obj_count[:MRB_TT_DATA])
 end
