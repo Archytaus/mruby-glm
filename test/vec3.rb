@@ -50,18 +50,38 @@ assert 'set z property' do
 	vec.z == 2
 end
 
-assert 'addition' do
+assert 'add' do
 	value = Vec3.new(0, 1, 0) + Vec3.new(1, 0, 0) + Vec3.new(0, 0, 1)
 	value.x == 1 && value.y == 1 && value.z == 1
 end
 
-assert 'multiplication' do
+assert 'add!' do
+	value = Vec3.new(0, 1, 0)
+	value.add! Vec3.new(1, 0, 0)
+	value.add! Vec3.new(0, 0, 1)
+	value.x == 1 && value.y == 1 && value.z == 1
+end
+
+assert 'multiply' do
 	value = Vec3.new(1) * Vec3.new(3)
 	value.x == 3 && value.y == 3 && value.z == 3
 end
 
-assert 'float multiplication' do
+assert 'multiply!' do
+	value = Vec3.new(1)
+	value.multiply! Vec3.new(3)
+	value.x == 3 && value.y == 3 && value.z == 3
+end
+
+assert 'float multiply' do
 	value = Vec3.new(1) * 3
+	value.x == 3 && value.y == 3 && value.z == 3
+end
+
+assert 'float multiply!' do
+	value = Vec3.new(1)
+	value.multiply! 3
+
 	value.x == 3 && value.y == 3 && value.z == 3
 end
 
@@ -71,18 +91,47 @@ assert 'multiplication is not destructive' do
 	original.x == 1 && original.y == 1 && original.z == 1
 end
 
-assert 'subtraction' do
+assert 'subtract' do
 	value = Vec3.new(3) - Vec3.new(2)
 	value.x == 1 && value.y == 1 && value.z == 1
 end
 
-assert 'division' do
+assert 'subtract!' do
+	value = Vec3.new(3)
+	value.subtract! Vec3.new(2)
+	value.x == 1 && value.y == 1 && value.z == 1
+end
+
+assert 'negate' do
+	value = -Vec3.new(3)
+	value.x == -3 && value.y == -3 && value.z == -3
+end
+
+assert 'negate!' do
+	value = Vec3.new(3)
+	value.negate!
+	value.x == -3 && value.y == -3 && value.z == -3
+end
+
+assert 'divide' do
 	value = Vec3.new(4) / Vec3.new(2)
 	value.x == 2 && value.y == 2 && value.z == 2
 end
 
-assert 'float division' do
+assert 'divide!' do
+	value = Vec3.new(4)
+	value.divide! Vec3.new(2)
+	value.x == 2 && value.y == 2 && value.z == 2
+end
+
+assert 'float divide' do
 	value = Vec3.new(4) / 2
+	value.x == 2 && value.y == 2 && value.z == 2
+end
+
+assert 'float divide!' do
+	value = Vec3.new(4)
+	value.divide! 2
 	value.x == 2 && value.y == 2 && value.z == 2
 end
 
@@ -99,6 +148,12 @@ assert 'normalize' do
 	value.x == 0 && value.y == 1 && value.z == 0
 end
 
+assert 'normalize!' do
+	value = Vec3.new(0, 5, 0)
+	value.normalize!
+	value.x == 0 && value.y == 1 && value.z == 0
+end
+
 assert 'length' do
 	value = Vec3.new(0, 3, 0).length
 	value == 3
@@ -112,4 +167,23 @@ end
 assert 'dot' do
 	value = Vec3.new(3).dot(Vec3.new(3, 4, 3))
 	value == 30
+end
+
+assert 'memory allocation' do
+	after_obj_count = {}
+	before_obj_count = {}
+	other_value = Vec3.new(3)
+	ObjectSpace.count_objects(before_obj_count)
+
+	value = Vec3.new(3)
+
+	ObjectSpace.count_objects(after_obj_count)
+	assert_equal(before_obj_count[:MRB_TT_DATA] + 1, after_obj_count[:MRB_TT_DATA])
+
+	ObjectSpace.count_objects(before_obj_count)
+
+	value.multiply! other_value
+
+	ObjectSpace.count_objects(after_obj_count)
+	assert_equal(before_obj_count[:MRB_TT_DATA], after_obj_count[:MRB_TT_DATA])
 end

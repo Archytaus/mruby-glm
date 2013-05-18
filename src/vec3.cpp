@@ -80,6 +80,21 @@ namespace mruby_glm
 		return new_value;
 	}
 
+	mrb_value vec3_equals(mrb_state* mrb, mrb_value self)
+	{
+		mrb_value new_value;
+		int args = mrb_get_args(mrb, "o", &new_value);
+		vec3* arg =(struct vec3*)mrb_data_get_ptr(mrb, new_value, &vec3_type);
+		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
+
+		if (!arg) return mrb_nil_value();
+
+		return mrb_bool_value(
+			selfValue->vector->x == arg->vector->x &&
+			selfValue->vector->y == arg->vector->y &&
+			selfValue->vector->z == arg->vector->z);
+	}
+
 	mrb_value vec3_plus(mrb_state* mrb, mrb_value self)
 	{
 		mrb_value new_value;
@@ -95,7 +110,7 @@ namespace mruby_glm
 				selfValue->vector->z + arg->vector->z)));
 	}
 
-	mrb_value vec3_equals(mrb_state* mrb, mrb_value self)
+	mrb_value vec3_plus_inplace(mrb_state* mrb, mrb_value self)
 	{
 		mrb_value new_value;
 		int args = mrb_get_args(mrb, "o", &new_value);
@@ -104,10 +119,11 @@ namespace mruby_glm
 
 		if (!arg) return mrb_nil_value();
 
-		return mrb_bool_value(
-			selfValue->vector->x == arg->vector->x &&
-			selfValue->vector->y == arg->vector->y &&
-			selfValue->vector->z == arg->vector->z);
+		selfValue->vector->x += arg->vector->x;
+		selfValue->vector->y += arg->vector->y;
+		selfValue->vector->z += arg->vector->z;
+
+		return self;
 	}
 
 	mrb_value vec3_subtract(mrb_state* mrb, mrb_value self)
@@ -126,6 +142,22 @@ namespace mruby_glm
 				selfValue->vector->z - arg->vector->z)));
 	}
 
+	mrb_value vec3_subtract_inplace(mrb_state* mrb, mrb_value self)
+	{
+		mrb_value new_value;
+		int args = mrb_get_args(mrb, "o", &new_value);
+		vec3* arg =(struct vec3*)mrb_data_get_ptr(mrb, new_value, &vec3_type);
+		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
+
+		if (!arg) return mrb_nil_value();
+
+		selfValue->vector->x -= arg->vector->x;
+		selfValue->vector->y -= arg->vector->y;
+		selfValue->vector->z -= arg->vector->z;
+
+		return self;
+	}
+
 	mrb_value vec3_usubtract(mrb_state* mrb, mrb_value self)
 	{
 		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
@@ -137,6 +169,19 @@ namespace mruby_glm
 				0 - selfValue->vector->x,
 				0 - selfValue->vector->y,
 				0 - selfValue->vector->z)));
+	}
+
+	mrb_value vec3_usubtract_inplace(mrb_state* mrb, mrb_value self)
+	{
+		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
+
+		if (!selfValue) return mrb_nil_value();
+
+		selfValue->vector->x = 0 - selfValue->vector->x;
+		selfValue->vector->y = 0 - selfValue->vector->y;
+		selfValue->vector->z = 0 - selfValue->vector->z;
+
+		return self;
 	}
 
 	mrb_value vec3_times(mrb_state* mrb, mrb_value self)
@@ -163,6 +208,36 @@ namespace mruby_glm
 				glm::vec3(selfValue->vector->x * modifier,
 					selfValue->vector->y * modifier,
 					selfValue->vector->z * modifier)));
+		}
+
+		return mrb_nil_value();
+	}
+
+	mrb_value vec3_times_inplace(mrb_state* mrb, mrb_value self)
+	{
+		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
+
+		mrb_value new_value;
+		mrb_get_args(mrb, "o", &new_value);
+		vec3* arg =(struct vec3*)mrb_data_get_ptr(mrb, new_value, &vec3_type);
+
+		if (arg)
+		{
+			selfValue->vector->x *= arg->vector->x;
+			selfValue->vector->y *= arg->vector->y;
+			selfValue->vector->z *= arg->vector->z;
+
+			return self;
+		}
+
+		mrb_float modifier;
+		mrb_get_args(mrb, "f", &modifier);
+		if(modifier) {
+			selfValue->vector->x *= modifier;
+			selfValue->vector->y *= modifier;
+			selfValue->vector->z *= modifier;
+
+			return self;
 		}
 
 		return mrb_nil_value();
@@ -195,6 +270,85 @@ namespace mruby_glm
 		}
 
 		return mrb_nil_value();
+	}
+
+	mrb_value vec3_divide_inplace(mrb_state* mrb, mrb_value self)
+	{
+		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
+
+		mrb_value new_value;
+		mrb_get_args(mrb, "o", &new_value);
+		vec3* arg =(struct vec3*)mrb_data_get_ptr(mrb, new_value, &vec3_type);
+
+		if (arg)
+		{
+			selfValue->vector->x /= arg->vector->x;
+			selfValue->vector->y /= arg->vector->y;
+			selfValue->vector->z /= arg->vector->z;
+
+			return self;
+		}
+
+		mrb_float modifier;
+		mrb_get_args(mrb, "f", &modifier);
+		if(modifier)
+		{
+			selfValue->vector->x /= modifier;
+			selfValue->vector->y /= modifier;
+			selfValue->vector->z /= modifier;
+
+			return self;
+		}
+
+		return mrb_nil_value();
+	}
+
+	mrb_value vec3_normalize(mrb_state* mrb, mrb_value self)
+	{
+		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
+		vec3* result = new vec3(glm::normalize(*selfValue->vector));
+
+		return vec3_wrap(mrb, mrb_class_get(mrb, "Vec3"), result);
+	}
+
+	mrb_value vec3_normalize_inplace(mrb_state* mrb, mrb_value self)
+	{
+		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
+
+		*selfValue->vector = glm::normalize(*selfValue->vector);
+
+		return self;
+	}
+
+	mrb_value vec3_length(mrb_state* mrb, mrb_value self)
+	{
+		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
+
+		return mrb_float_value(glm::length(*selfValue->vector));
+	}
+
+	mrb_value vec3_distance(mrb_state* mrb, mrb_value self)
+	{
+		mrb_value new_value;
+		int args = mrb_get_args(mrb, "o", &new_value);
+		vec3* arg =(struct vec3*)mrb_data_get_ptr(mrb, new_value, &vec3_type);
+		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
+
+		if (!arg) return mrb_nil_value();
+
+		return mrb_float_value(glm::distance(*selfValue->vector, *arg->vector));
+	}
+
+	mrb_value vec3_dot(mrb_state* mrb, mrb_value self)
+	{
+		mrb_value new_value;
+		int args = mrb_get_args(mrb, "o", &new_value);
+		vec3* arg =(struct vec3*)mrb_data_get_ptr(mrb, new_value, &vec3_type);
+		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
+
+		if (!arg) return mrb_nil_value();
+
+		return mrb_float_value(glm::dot(*selfValue->vector, *arg->vector));
 	}
 
 	mrb_value vec3_initialize(mrb_state *mrb, mrb_value self)
@@ -231,45 +385,6 @@ namespace mruby_glm
 		return self;
 	}
 
-	mrb_value vec3_normalize(mrb_state* mrb, mrb_value self)
-	{
-		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
-		vec3* result = new vec3(glm::normalize(*selfValue->vector));
-
-		return vec3_wrap(mrb, mrb_class_get(mrb, "Vec3"), result);
-	}
-
-	mrb_value vec3_length(mrb_state* mrb, mrb_value self)
-	{
-		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
-
-		return mrb_float_value(glm::length(*selfValue->vector));
-	}
-
-	mrb_value vec3_distance(mrb_state* mrb, mrb_value self)
-	{
-		mrb_value new_value;
-		int args = mrb_get_args(mrb, "o", &new_value);
-		vec3* arg =(struct vec3*)mrb_data_get_ptr(mrb, new_value, &vec3_type);
-		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
-
-		if (!arg) return mrb_nil_value();
-
-		return mrb_float_value(glm::distance(*selfValue->vector, *arg->vector));
-	}
-
-	mrb_value vec3_dot(mrb_state* mrb, mrb_value self)
-	{
-		mrb_value new_value;
-		int args = mrb_get_args(mrb, "o", &new_value);
-		vec3* arg =(struct vec3*)mrb_data_get_ptr(mrb, new_value, &vec3_type);
-		vec3* selfValue = (struct vec3*)mrb_data_get_ptr(mrb, self, &vec3_type);
-
-		if (!arg) return mrb_nil_value();
-
-		return mrb_float_value(glm::dot(*selfValue->vector, *arg->vector));
-	}
-
 	mrb_value vec3_inspect(mrb_state* mrb, mrb_value self)
 	{
 		char buf[256];
@@ -298,12 +413,29 @@ namespace mruby_glm
 		mrb_define_method(mrb, vector3Class, "z=", vec3_set_z, ARGS_REQ(1));
 
 		mrb_define_method(mrb, vector3Class, "+", vec3_plus, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "add", vec3_plus, ARGS_REQ(1));
 		mrb_define_method(mrb, vector3Class, "-", vec3_subtract, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "subtract", vec3_subtract, ARGS_REQ(1));
 		mrb_define_method(mrb, vector3Class, "-@", vec3_usubtract, ARGS_NONE());
+		mrb_define_method(mrb, vector3Class, "negate", vec3_usubtract, ARGS_NONE());
 		mrb_define_method(mrb, vector3Class, "*", vec3_times, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "multiply", vec3_times, ARGS_REQ(1));
 		mrb_define_method(mrb, vector3Class, "/", vec3_divide, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "divide", vec3_times, ARGS_REQ(1));
+
+		mrb_define_method(mrb, vector3Class, "+=", vec3_plus_inplace, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "add!", vec3_plus_inplace, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "-=", vec3_subtract_inplace, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "subtract!", vec3_subtract_inplace, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "negate!", vec3_usubtract_inplace, ARGS_NONE());
+		mrb_define_method(mrb, vector3Class, "*=", vec3_times_inplace, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "multiply!", vec3_times_inplace, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "/=", vec3_divide_inplace, ARGS_REQ(1));
+		mrb_define_method(mrb, vector3Class, "divide!", vec3_divide_inplace, ARGS_REQ(1));
 
 		mrb_define_method(mrb, vector3Class, "normalize", vec3_normalize, ARGS_NONE());
+		mrb_define_method(mrb, vector3Class, "normalize!", vec3_normalize_inplace, ARGS_NONE());
+
 		mrb_define_method(mrb, vector3Class, "length", vec3_length, ARGS_NONE());
 
 		mrb_define_method(mrb, vector3Class, "dot", vec3_dot, ARGS_REQ(1));
